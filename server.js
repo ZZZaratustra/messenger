@@ -4,7 +4,7 @@ import {writeFile, readFileSync, existsSync} from 'fs'
 
 const clients = {}
 const log = existsSync('log') && readFileSync('log')
-const messages =JSON.parse(log.toString()) || []
+const messages = JSON.parse(log.toString()) || []
 
 const day = new Date().toJSON().slice(0,10).replace(/-/g,'/')
 const time = new Date().toJSON().slice(11,19).replace(/-/g,'/')
@@ -22,7 +22,7 @@ wss.on('connection', (ws) => {
         const {name, message, day, time} = JSON.parse(rawMessage)
         messages.push({name, message, day, time})
         for (const id in clients) {
-            clients[id].send(JSON.stringify([{name, message}]))
+            clients[id].send(JSON.stringify([{name, message, day, time}]))
         }
     })
     ws.on('close', () =>  {
@@ -34,7 +34,7 @@ wss.on('connection', (ws) => {
     process.on('SIGINT', () => {
         wss.close()
         writeFile('log', JSON.stringify(messages), err => {
-            if (err) console.log('err')
+            if (err) { console.log('err') }
             process.exit()
         })
     })
