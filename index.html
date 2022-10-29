@@ -12,8 +12,6 @@
     </form>
     <div id = "chat"></div>
     <script type="module">
-    const day = new Date().toJSON().slice(0,10).replace(/-/g,'/')
-    const time = new Date().toJSON().slice(11,19).replace(/-/g,'/')
 
         const chatEl = document.getElementById("chat")
         const ws = new WebSocket("ws://127.0.0.1:8000")
@@ -21,6 +19,8 @@
             console.log(JSON.parse(message.data))
             const messages = JSON.parse(message.data)
             messages.forEach((val) => {
+                const day = new Date().toJSON().slice(0,10).replace(/-/g,'/')
+                const time = new Date().toJSON().slice(11,19).replace(/-/g,'/')
                 const messageEl = document.createElement('div')
                 messageEl.appendChild(document.createTextNode(`${val.name} ${val.message} ${time} ${day}`))
                 chat.appendChild(messageEl)

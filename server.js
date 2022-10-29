@@ -1,8 +1,13 @@
 import {WebSocketServer} from 'ws'
 import {v4 as uuid} from 'uuid'
+import {writeFile, readFileSync, existsSync} from 'fs'
 
 const clients = {}
-const messages = []
+const log = existsSync('log') && readFileSync('log')
+const messages =JSON.parse(log.toString()) || []
+
+const day = new Date().toJSON().slice(0,10).replace(/-/g,'/')
+const time = new Date().toJSON().slice(11,19).replace(/-/g,'/')
 
 const wss = new WebSocketServer({port: 8000})
 wss.on('connection', (ws) => {
@@ -14,8 +19,8 @@ wss.on('connection', (ws) => {
 
     ws.on('message', (rawMessage) => {
         console.log(rawMessage.toString())
-        const {name, message} = JSON.parse(rawMessage)
-        messages.push({name, message})
+        const {name, message, day, time} = JSON.parse(rawMessage)
+        messages.push({name, message, day, time})
         for (const id in clients) {
             clients[id].send(JSON.stringify([{name, message}]))
         }
@@ -25,3 +30,11 @@ wss.on('connection', (ws) => {
         console.log(`Connection witht client ${id} have lost`)
     })
 })
+
+    process.on('SIGINT', () => {
+        wss.close()
+        writeFile('log', JSON.stringify(messages), err => {
+            if (err) console.log('err')
+            process.exit()
+        })
+    })
